@@ -1,25 +1,43 @@
 from flask import Flask
-import json
 import os
+import json
 
 app = Flask(__name__)
-FILE = "counter.json"
 
-def load_count():
-    if os.path.exists(FILE):
-        with open(FILE, "r") as f:
-            return json.load(f).get("count", 0)
-    return 0
+# カウント保存ファイル
+COUNT_FILE = "count.json"
 
-def save_count(count):
-    with open(FILE, "w") as f:
-        json.dump({"count": count}, f)
+# 初期化（ファイルがない場合）
+if not os.path.exists(COUNT_FILE):
+    with open(COUNT_FILE, "w") as f:
+        json.dump({"count": 0}, f)
 
+# アクセスカウントの取得と更新
+def get_count():
+    with open(COUNT_FILE, "r") as f:
+        data = json.load(f)
+    return data["count"]
+
+def update_count():
+    with open(COUNT_FILE, "r") as f:
+        data = json.load(f)
+    data["count"] += 1
+    with open(COUNT_FILE, "w") as f:
+        json.dump(data, f)
+
+# ルートページ
 @app.route("/")
 def index():
-    count = load_count() + 1
-    save_count(count)
-    return f"<h1>アクセス数: {count} 回</h1>"
+    update_count()
+    count = get_count()
+    return f"""
+    <html>
+    <head><title>アクセスカウンター</title></head>
+    <body>
+        <h1>アクセス数: {count} 回</h1>
+    </body>
+    </html>
+    """
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
