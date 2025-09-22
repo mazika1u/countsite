@@ -4,15 +4,14 @@ import json
 
 app = Flask(__name__)
 
-# カウント保存ファイル
+# カウント保存用
 COUNT_FILE = "count.json"
 
-# 初期化（ファイルがない場合）
 if not os.path.exists(COUNT_FILE):
     with open(COUNT_FILE, "w") as f:
         json.dump({"count": 0}, f)
 
-# アクセスカウントの取得と更新
+# アクセスカウントの取得&更新
 def get_count():
     with open(COUNT_FILE, "r") as f:
         data = json.load(f)
@@ -25,14 +24,14 @@ def update_count():
     with open(COUNT_FILE, "w") as f:
         json.dump(data, f)
 
-# ルートページ
+# ルート
 @app.route("/")
 def index():
     update_count()
     count = get_count()
     return f"""
     <html>
-    <head><title>アクセスカウンター</title></head>
+    <head><title>アクセスカウント</title></head>
     <body>
         <h1>アクセス数: {count} 回</h1>
     </body>
